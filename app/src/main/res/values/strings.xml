@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Note Keeper</string>
+    <string name="welcome_message">Take notes concerning any activity
+        in an organised manner.
+    </string>
+    <string name="edit_notes">Edit Notes</string>
+</resources>
