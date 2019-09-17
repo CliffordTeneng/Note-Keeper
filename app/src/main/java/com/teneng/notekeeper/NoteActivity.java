@@ -1,14 +1,10 @@
 package com.teneng.notekeeper;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,8 +16,10 @@ import java.util.List;
 
 public class NoteActivity extends AppCompatActivity {
 
-    public static final String FIRST_LAUNCH = "first_launched";
     public static final String NOTE_POSITION = "com.teneng.notekeeper.NOTE_POSITION";
+    public static final String ORIGINAL_NOTE_COURSE_ID = "com.teneng.notekeeper.ORIGINAL_NOTE_COURSE_ID";
+    public static final String ORIGINAL_NOTE_TITLE = "com.teneng.notekeeper.ORIGINAL_NOTE_TITLE";
+    public static final String ORIGINAL_NOTE_TEXT = "com.teneng.notekeeper.ORIGINAL_NOTE_TEXT";
     public static final int NOT_POSITION = -1;
     private NoteInfo notes;
     private boolean isNewNote = false;
@@ -29,6 +27,10 @@ public class NoteActivity extends AppCompatActivity {
     private EditText noteTitle;
     private EditText noteText;
     private int notePosition;
+    private boolean isCancelling;
+    private String originalNoteCourseId;
+    private String originalNoteTitle;
+    private String originalNoteText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,14 +39,22 @@ public class NoteActivity extends AppCompatActivity {
 
         spinner = findViewById(R.id.spinner_id);
 
-       // alertMessage();
-
         List<CourseInfo> courses = DataManager.getInstance().getCourses();
         ArrayAdapter<CourseInfo> arrayAdapterCourses = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, courses);
         arrayAdapterCourses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(arrayAdapterCourses);
 
         readNoteReceived();
+
+        if (savedInstanceState == null){
+
+            saveOriginalNotes();
+
+        }else{
+
+            restoreOriginalNoteValues(savedInstanceState);
+        }
+
 
         noteTitle = findViewById(R.id.note_title);
         noteText = findViewById(R.id.note_text);
@@ -54,6 +64,21 @@ public class NoteActivity extends AppCompatActivity {
         }else {
             displayNotes(spinner, noteTitle, noteText);
         }
+    }
+
+    private void restoreOriginalNoteValues(Bundle savedInstanceState) {
+        originalNoteCourseId = savedInstanceState.getString(ORIGINAL_NOTE_COURSE_ID);
+        originalNoteTitle = savedInstanceState.getString(ORIGINAL_NOTE_TITLE);
+        originalNoteText = savedInstanceState.getString(ORIGINAL_NOTE_TEXT);
+    }
+
+    private void saveOriginalNotes() {
+        if (isNewNote){
+            return;
+        }
+        originalNoteCourseId = notes.getCourse().getCourseId();
+        originalNoteTitle = notes.getTitle();
+        originalNoteText = notes.getText();
     }
 
     @Override
@@ -68,6 +93,9 @@ public class NoteActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.send_mail){
             sendEmail();
             return true;
+        }else if (item.getItemId() == R.id.cancel){
+            isCancelling = true;
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -75,7 +103,32 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        saveNotes();
+        if(isCancelling){
+
+            if (isNewNote){
+
+                DataManager.getInstance().removeNote(notePosition);
+            }else {
+                storePreviouseNoteValues();
+            }
+        }else {
+            saveNotes();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(ORIGINAL_NOTE_COURSE_ID, originalNoteCourseId);
+        outState.putString(ORIGINAL_NOTE_TITLE, originalNoteTitle);
+        outState.putString(ORIGINAL_NOTE_TEXT, originalNoteText);
+    }
+
+    private void storePreviouseNoteValues() {
+        CourseInfo course = DataManager.getInstance().getCourse(originalNoteCourseId);
+        notes.setCourse(course);
+        notes.setText(originalNoteText);
+        notes.setTitle(originalNoteTitle);
     }
 
     private void saveNotes() {
@@ -127,25 +180,5 @@ public class NoteActivity extends AppCompatActivity {
         notes =  dm.getNotes().get(notePosition);
     }
 
-    public void alertMessage(){
 
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean isFirst = sharedPreferences.getBoolean(FIRST_LAUNCH, true);
-
-        if(isFirst){
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.welcome_message);
-            builder.setPositiveButton("Start", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean(FIRST_LAUNCH, false);
-                    dialogInterface.dismiss();
-                }
-            });
-            builder.setTitle("Welcome to Note Keeper");
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
-        }
-    }
 }
