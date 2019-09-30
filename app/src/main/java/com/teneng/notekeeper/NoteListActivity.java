@@ -10,6 +10,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -22,7 +24,7 @@ import java.util.List;
 public class NoteListActivity extends AppCompatActivity {
 
     public static final String FIRST_LAUNCH = "com.teneng.notekeeper.FIRST_LAUNCH";
-    private ArrayAdapter<NoteInfo> adapterNotes;
+   // private ArrayAdapter<NoteInfo> adapterNotes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,25 +49,29 @@ public class NoteListActivity extends AppCompatActivity {
 
     private void displayNotes() {
 
-        final ListView noteList = findViewById(R.id.list_notes);
+//        final ListView noteList = findViewById(R.id.list_notes);
+//
+//        List<NoteInfo> noteInfos = DataManager.getInstance().getNotes();
+//
+//        adapterNotes = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, noteInfos);
+//
+//        noteList.setAdapter(adapterNotes);
+//
+//        noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//                Intent intent = new Intent(NoteListActivity.this, NoteActivity.class);
+//
+////                NoteInfo notes = (NoteInfo) noteList.getItemAtPosition(position);
+//                intent.putExtra(NoteActivity.NOTE_POSITION, position);
+//                startActivity(intent);
+//
+//            }
+//        });
 
-        List<NoteInfo> noteInfos = DataManager.getInstance().getNotes();
-
-        adapterNotes = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, noteInfos);
-
-        noteList.setAdapter(adapterNotes);
-
-        noteList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Intent intent = new Intent(NoteListActivity.this, NoteActivity.class);
-
-//                NoteInfo notes = (NoteInfo) noteList.getItemAtPosition(position);
-                intent.putExtra(NoteActivity.NOTE_POSITION, position);
-                startActivity(intent);
-
-            }
-        });
+        final RecyclerView note_list = findViewById(R.id.note_list_rv);
+        final LinearLayoutManager notesLayoutManager = new LinearLayoutManager(this);
+        note_list.setLayoutManager(notesLayoutManager);
     }
 
     public void alertMessage(){
@@ -93,6 +99,6 @@ public class NoteListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        adapterNotes.notifyDataSetChanged();
+       // adapterNotes.notifyDataSetChanged();
     }
 }
