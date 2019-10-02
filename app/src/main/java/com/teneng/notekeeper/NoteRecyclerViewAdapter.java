@@ -1,5 +1,7 @@
 package com.teneng.notekeeper;
 
+import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -8,6 +10,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class NoteRecyclerViewAdapter extends RecyclerView.Adapter{
 
+
+    private final Context context;
+    private final LayoutInflater layoutInflater;
+
+    public NoteRecyclerViewAdapter(Context context) {
+        this.context = context;
+        layoutInflater = LayoutInflater.from(context);
+    }
 
     @NonNull
     @Override
