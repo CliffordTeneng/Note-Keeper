@@ -24,7 +24,8 @@ import java.util.List;
 public class NoteListActivity extends AppCompatActivity {
 
     public static final String FIRST_LAUNCH = "com.teneng.notekeeper.FIRST_LAUNCH";
-   // private ArrayAdapter<NoteInfo> adapterNotes;
+    private NoteRecyclerViewAdapter noteRecyclerViewAdapter;
+    // private ArrayAdapter<NoteInfo> adapterNotes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,10 @@ public class NoteListActivity extends AppCompatActivity {
         final RecyclerView note_list = findViewById(R.id.note_list_rv);
         final LinearLayoutManager notesLayoutManager = new LinearLayoutManager(this);
         note_list.setLayoutManager(notesLayoutManager);
+
+        List<NoteInfo> noteInfos = DataManager.getInstance().getNotes();
+        noteRecyclerViewAdapter = new NoteRecyclerViewAdapter(this , noteInfos);
+        note_list.setAdapter(noteRecyclerViewAdapter);
     }
 
     public void alertMessage(){
@@ -100,5 +105,6 @@ public class NoteListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
        // adapterNotes.notifyDataSetChanged();
+        noteRecyclerViewAdapter.notifyDataSetChanged();
     }
 }
