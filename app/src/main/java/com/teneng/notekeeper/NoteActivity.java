@@ -31,6 +31,7 @@ public class NoteActivity extends AppCompatActivity {
     private String originalNoteCourseId;
     private String originalNoteTitle;
     private String originalNoteText;
+    private int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +97,29 @@ public class NoteActivity extends AppCompatActivity {
         }else if (item.getItemId() == R.id.cancel){
             isCancelling = true;
             finish();
+        }else if (item.getItemId() == R.id.next){
+            moveNextNote();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.next);
+        int lastNoteIndex = DataManager.getInstance().getNotes().size() - 1;
+        item.setEnabled(notePosition < lastNoteIndex);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private void moveNextNote() {
+        saveNotes();
+
+        ++notePosition;
+        notes = DataManager.getInstance().getNotes().get(notePosition);
+
+        saveOriginalNotes();
+        displayNotes(spinner,noteTitle, noteText);
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -164,7 +186,7 @@ public class NoteActivity extends AppCompatActivity {
     private void readNoteReceived() {
         Intent intent = getIntent();
 //        notes = intent.getParcelableExtra(NOTE_POSITION);
-        int position = intent.getIntExtra(NOTE_POSITION, NOT_POSITION);
+        position = intent.getIntExtra(NOTE_POSITION, NOT_POSITION);
         isNewNote = position == NOT_POSITION;
 
         if (!isNewNote){
